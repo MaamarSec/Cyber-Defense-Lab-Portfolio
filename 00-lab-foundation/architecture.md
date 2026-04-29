@@ -35,8 +35,9 @@ All virtual machines run inside an isolated VirtualBox environment using multipl
 
 ---
 
-## 📡 High‑Level Diagram (ASCII)
+## ## 📡 High‑Level Diagram (ASCII)
 
+```
                  [ Host Machine ]
                         |
                 Host‑Only Network
@@ -47,6 +48,8 @@ All virtual machines run inside an isolated VirtualBox environment using multipl
      (Sensor)            (Client)             (Client)
         |                   |                   |
         ---------------- Internal Network ----------------
+```
+
 
 ---
 
