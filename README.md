@@ -10,12 +10,14 @@ I’m building a hands‑on Security Operations Center (SOC) home lab from scrat
 
 ## 📊 **Current Progress**
 
-| Phase        | Topic                 | Status         | Portfolio Folder         |
-|--------------|------------------------|----------------|--------------------------|
-| Phase 1      | Lab Foundation         | 🔄 In Progress | `00-lab-foundation/`     |
-| Phase 2      | Network Monitoring     | ⏳ Upcoming    | `01-network-defense/`    |
-| Phase 3      | Firewall & IDS/IPS     | ⏳ Upcoming    | `01-network-defense/`    |
-| Phases 4–16  | Additional Topics      | ⏳ Upcoming    | `02–12 planned folders`  |
+
+| Phase | Topic | Status | Portfolio Folder |
+|-------|--------|---------|------------------|
+| Phase 1 | Lab Foundation | ✅ Completed | 00-lab-foundation/ |
+| Phase 2 | Network Monitoring | In Progress | 01-network-defense/ |
+| Phase 3 | Firewall & IDS/IPS | Upcoming | 01-network-defense/ |
+| Phases 4–16 | Additional Topics | Upcoming | 02–12 planned folders |
+
 
 ---
 
