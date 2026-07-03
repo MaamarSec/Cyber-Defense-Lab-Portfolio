@@ -14,9 +14,9 @@ I’m building a hands‑on Security Operations Center (SOC) home lab from scrat
 | Phase | Topic | Status | Portfolio Folder |
 |-------|--------|---------|------------------|
 | Phase 1 | Lab Foundation | ✅ Completed | 00-lab-foundation/ |
-| Phase 2 | Network Monitoring | In Progress | 01-network-defense/ |
-| Phase 3 | Firewall & IDS/IPS | Upcoming | 01-network-defense/ |
-| Phases 4–16 | Additional Topics | Upcoming | 02–12 planned folders |
+| Phase 2 | Network Monitoring & Threat Detection | ✅ Completed | 02-threat-detection/ |
+| Phase 3 | Firewall & IDS/IPS | 🧩 In Progress | 03-firewall-IDS-IPS/ |
+| Phases 4–16 | Additional SOC Topics | 🔜 Upcoming | 04–12 planned folders |
 
 
 ---
