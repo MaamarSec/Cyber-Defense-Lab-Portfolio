@@ -3,7 +3,7 @@
 I’m building a hands‑on Security Operations Center (SOC) home lab from scratch and documenting my progress as I learn defensive security across network monitoring, endpoint security, SIEM engineering, threat hunting, and cloud defense.
 
 **Created by:** Maamar-Sec  
-**Status:** 🚧 In Progress — Phase 1 of 16  
+**Status:** 🚧 In Progress — Phase 3 of 16  
 **Started:** April 2026  
 
 ---
@@ -32,26 +32,42 @@ I’m building a hands‑on Security Operations Center (SOC) home lab from scrat
 
 ---
 
-## 🎯 **Skills I’m Developing**
+🎯 Skills Progress
+✅ Completed
 
-### ✅ **Completed**
-- Virtual lab infrastructure setup  
-- Basic network configuration and segmentation  
+    Virtual lab infrastructure setup
 
-### 🔄 **Currently Learning (Phase 1–2)**
-- Network traffic capture and analysis (Wireshark)  
-- Protocol analysis and logging (Zeek)  
-- Intrusion detection with Suricata  
-- Writing and testing simple IDS rules  
+    Basic network configuration and segmentation
 
-### ⏳ **Upcoming**
-- Windows & Linux endpoint hardening  
-- SIEM deployment (ELK Stack)  
-- Threat intelligence integration  
-- Incident response workflows  
-- Forensics and log analysis  
-- Cloud security fundamentals  
-- Purple team testing inside the lab  
+    Suricata installation, configuration, and alert testing
+
+    Network threat detection fundamentals
+
+🔄 Currently Learning (Phase 3)
+
+    Windows Firewall rule creation
+
+    Linux UFW rule configuration
+
+    IDS/IPS concepts and testing
+
+    Network access control
+
+⏳ Upcoming
+
+    Windows & Linux endpoint hardening
+
+    SIEM deployment (ELK Stack)
+
+    Threat intelligence integration
+
+    Incident response workflows
+
+    Forensics and log analysis
+
+    Cloud security fundamentals
+
+    Purple team testing inside the lab
 
 ---
 
