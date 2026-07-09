@@ -10,14 +10,12 @@ I’m building a hands‑on Security Operations Center (SOC) home lab from scrat
 
 ## 📊 **Current Progress**
 
-
 | Phase | Topic | Status | Portfolio Folder |
 |-------|--------|---------|------------------|
 | Phase 1 | Lab Foundation | ✅ Completed | 00-lab-foundation/ |
 | Phase 2 | Network Monitoring & Threat Detection | ✅ Completed | 02-threat-detection/ |
-| Phase 3 | Firewall & IDS/IPS | 🧩 In Progress | 03-firewall-IDS-IPS/ |
+| Phase 3 | Network Protection Layer (pfSense + Suricata IPS + pfBlockerNG) | 🧩 Completed | 03-network-protection-layer/ |
 | Phases 4–16 | Additional SOC Topics | 🔜 Upcoming | 04–12 planned folders |
-
 
 ---
 
@@ -28,58 +26,49 @@ I’m building a hands‑on Security Operations Center (SOC) home lab from scrat
 - **Monitored Endpoints:** Windows 10, Ubuntu Desktop  
 - **Virtualization:** VirtualBox  
 - **Network Segmentation:** NAT + Host‑Only + Internal networks  
-
+- **Firewall & IPS:** pfSense + Suricata Inline IPS  
+- **Threat Filtering:** pfBlockerNG GeoIP + Reputation Lists  
 
 ---
 
-🎯 Skills Progress
-✅ Completed
+## 🎯 **Skills Progress**
 
-    Virtual lab infrastructure setup
+### ✅ **Completed**
+- Virtual lab infrastructure setup  
+- Basic network configuration and segmentation  
+- Suricata installation, configuration, IDS/IPS testing  
+- Network threat detection fundamentals  
+- pfSense firewall rule design  
+- pfBlockerNG Geo-blocking & IP reputation filtering  
+- Full VM routing through pfSense  
 
-    Basic network configuration and segmentation
+### 🔄 **Currently Learning (Phase 3 → Phase 4)**
+- Windows Firewall rule creation  
+- Linux UFW rule configuration  
+- IDS/IPS tuning  
+- Network access control  
+- Preparing SIEM ingestion (logs → ELK/Wazuh)  
 
-    Suricata installation, configuration, and alert testing
-
-    Network threat detection fundamentals
-
-🔄 Currently Learning (Phase 3)
-
-    Windows Firewall rule creation
-
-    Linux UFW rule configuration
-
-    IDS/IPS concepts and testing
-
-    Network access control
-
-⏳ Upcoming
-
-    Windows & Linux endpoint hardening
-
-    SIEM deployment (ELK Stack)
-
-    Threat intelligence integration
-
-    Incident response workflows
-
-    Forensics and log analysis
-
-    Cloud security fundamentals
-
-    Purple team testing inside the lab
+### ⏳ **Upcoming**
+- Windows & Linux endpoint hardening  
+- SIEM deployment (ELK Stack or Wazuh)  
+- Threat intelligence integration  
+- Incident response workflows  
+- Forensics and log analysis  
+- Cloud security fundamentals  
+- Purple team testing inside the lab  
 
 ---
 
 ## 📂 **Portfolio Structure**
 
 ### **Active**
-_No active folders yet — Phase 1 setup in progress._
+- `03-network-protection-layer/`  
+  - pfSense setup  
+  - Suricata IPS  
+  - pfBlockerNG  
 
 ### **Planned**
-- `01-network-defense/` — Network monitoring, Zeek, Suricata, IDS/IPS  
-- `02-endpoint-hardening/`  
-- `03-active-directory-security/`  
 - `04-siem-detections/`  
 - `05-threat-intelligence/`  
 - `06-threat-hunting/`  
@@ -97,9 +86,11 @@ _No active folders yet — Phase 1 setup in progress._
 ### **Currently Using**
 - VirtualBox, Ubuntu Server 22.04, Windows 10  
 - Wireshark, Zeek, Suricata, Nmap  
+- pfSense firewall  
+- pfBlockerNG GeoIP filtering  
 
 ### **Planned**
-- ELK Stack, Wazuh, pfSense  
+- ELK Stack, Wazuh  
 - Volatility, KAPE, OSQuery, MISP  
 - AWS logging & monitoring  
 - Atomic Red Team  
@@ -134,5 +125,3 @@ This portfolio is based on:
 
 All security activities are carried out strictly within controlled lab environments on systems that I own.  
 This project is dedicated solely to ethical and defensive cybersecurity practices.
-
----
