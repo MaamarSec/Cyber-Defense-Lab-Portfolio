@@ -2,47 +2,44 @@ Windows GPO Hardening (CIS Benchmark for Windows 10)
 1. CIS Portal Access
 
 Screenshot: CIS-Security-Portal-Dashboard.png  
-Shows the official CIS Benchmark source used for Windows 10 hardening.
+Shows official CIS Benchmark source.
 2. Account Lockout Policies
-Baseline
 
-Screenshot: Windows-Baseline-Account-Lockout-Policies.png
-Hardened (CIS Recommended)
+    Baseline: Windows-Baseline-Account-Lockout-Policies.png
 
-Screenshot: CIS-Hardened-Account-Lockout-Policies.png
+    Hardened: CIS-Hardened-Account-Lockout-Policies.png
+
 3. Password Policies
-Baseline
 
-Screenshot: Windows-Default-Password-History-Policy.png
-Hardened (CIS Recommended)
+    Baseline: Windows-Default-Password-History-Policy.png
 
-Screenshot: CIS-Hardened-Password-Complexity-Policies.png
-Enforcement Test
+    Hardened: CIS-Hardened-Password-Complexity-Policies.png
 
-Screenshot: Password-Policy-Enforcement-Validation-Test.png
+    Enforcement Test: Password-Policy-Enforcement-Validation-Test.png
+
 4. Services Hardening
 
-Screenshot: Windows-Services-Hardening-Disabling-Unused-Features.png
-Disabled Services
+Screenshot: Windows-Services-Hardening-Disabling-Unused-Features.png  
+Disabled:
 
-    Print Spooler — disabled due to the PrintNightmare (CVE‑2021‑34527) vulnerability, which allowed remote code execution and privilege escalation.
+    Print Spooler (PrintNightmare)
 
-    Xbox services — non‑enterprise, unnecessary services that increase attack surface.
+    Xbox services
 
 5. Apply Policies
 
-Screenshot: PowerShell-Force-Group-Policy-Update.png
-Command Used: 
+Screenshot: PowerShell-Force-Group-Policy-Update.png  
+Command used:
+Code
 
 gpupdate /force
 
-Applies all modified Group Policy settings immediately.
 Tools Used (Win+R Commands)
 
-    gpedit.msc — Local Group Policy Editor
+    gpedit.msc
 
-    secpol.msc — Local Security Policy
+    secpol.msc
 
-    services.msc — Windows Services Manager
+    services.msc
 
-    eventvwr.msc — Event Viewer
+    eventvwr.msc
