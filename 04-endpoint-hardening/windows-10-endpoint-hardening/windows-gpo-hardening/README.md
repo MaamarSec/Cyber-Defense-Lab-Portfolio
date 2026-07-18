@@ -1,45 +1,59 @@
-Windows GPO Hardening (CIS Benchmark for Windows 10)
-1. CIS Portal Access
+# Windows GPO Hardening (CIS Benchmark for Windows 10)
 
-Screenshot: CIS-Security-Portal-Dashboard.png  
-Shows official CIS Benchmark source.
-2. Account Lockout Policies
+## 1. CIS Portal Access
+**Screenshot:** CIS-Security-Portal-Dashboard.png  
+Shows the official CIS Benchmark source used for Windows 10 hardening.
 
-    Baseline: Windows-Baseline-Account-Lockout-Policies.png
+---
 
-    Hardened: CIS-Hardened-Account-Lockout-Policies.png
+## 2. Account Lockout Policies
 
-3. Password Policies
+### Baseline
+**Screenshot:** Windows-Baseline-Account-Lockout-Policies.png
 
-    Baseline: Windows-Default-Password-History-Policy.png
+### Hardened (CIS Recommended)
+**Screenshot:** CIS-Hardened-Account-Lockout-Policies.png
 
-    Hardened: CIS-Hardened-Password-Complexity-Policies.png
+---
 
-    Enforcement Test: Password-Policy-Enforcement-Validation-Test.png
+## 3. Password Policies
 
-4. Services Hardening
+### Baseline
+**Screenshot:** Windows-Default-Password-History-Policy.png
 
-Screenshot: Windows-Services-Hardening-Disabling-Unused-Features.png  
-Disabled:
+### Hardened (CIS Recommended)
+**Screenshot:** CIS-Hardened-Password-Complexity-Policies.png
 
-    Print Spooler (PrintNightmare)
+### Enforcement Test
+**Screenshot:** Password-Policy-Enforcement-Validation-Test.png
 
-    Xbox services
+---
 
-5. Apply Policies
+## 4. Services Hardening
+**Screenshot:** Windows-Services-Hardening-Disabling-Unused-Features.png
 
-Screenshot: PowerShell-Force-Group-Policy-Update.png  
-Command used:
-Code
+### Disabled Services
+- Print Spooler — disabled due to the PrintNightmare (CVE‑2021‑34527) vulnerability  
+- Xbox services — non‑enterprise, unnecessary services that increase attack surface
+
+---
+
+## 5. Apply Policies
+**Screenshot:** PowerShell-Force-Group-Policy-Update.png
+
+### Command Used
+
 
 gpupdate /force
 
-Tools Used (Win+R Commands)
 
-    gpedit.msc
+Applies all modified Group Policy settings immediately.
 
-    secpol.msc
+---
 
-    services.msc
+## Tools Used (Win+R Commands)
+- **[gpedit.msc](ca://s?q=Explain_gpedit.msc)** — Local Group Policy Editor  
+- **[secpol.msc](ca://s?q=Explain_secpol.msc)** — Local Security Policy  
+- **[services.msc](ca://s?q=Explain_services.msc)** — Windows Services Manager  
+- **[eventvwr.msc](ca://s?q=Explain_eventvwr.msc)** — Event Viewer
 
-    eventvwr.msc
