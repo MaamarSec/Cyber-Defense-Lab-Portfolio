@@ -147,18 +147,5 @@ This Windows 10 endpoint is now:
 - Reduced attack surface through service hardening  
 - Ready for SIEM ingestion in Lab 5  
 
-This completes **Lab 4 — Windows 10 Endpoint Hardening**.
 
----
-
-## Next Phase
-
-Proceed to **Linux Endpoint Hardening (Lab 5)**  
-This will include:
-- CIS Benchmark for Ubuntu  
-- UFW firewall  
-- Auditd logging  
-- SSH hardening  
-- Sysmon for Linux  
-- Service hardening  
 
