@@ -2,33 +2,37 @@
 
 I'm building a hands-on Security Operations Center (SOC) home lab from scratch and documenting my progress as I learn defensive security across network monitoring, endpoint security, identity & access management, SIEM engineering, threat hunting, and cloud defense.
 
-**Created by:** Maamar-Sec
-**Status:** 🚧 In Progress
-**Started:** April 2026
+- **Created by:** MaamarSec
+- **Status:** 🚧 In Progress
+- **Started:** April 2026
+- **Career Target:** Entry-Level SOC Analyst / Junior Security Engineer
 
 ---
 
 ## 📊 Current Progress
 
 | Folder | Topic | Status |
-|---|---|---|
-| `00-lab-foundation/` | Lab Foundation & Infrastructure Setup | ✅ Completed |
-| `01-monitoring-infrastructure/` | Network Traffic Monitoring (TShark, Zeek, Suricata) | ✅ Completed |
-| `02-threat-detection/` | Network Monitoring & Threat Detection | ✅ Completed |
-| `03-network-protection-layer/` | Network Protection Layer (pfSense + Suricata IPS + pfBlockerNG) | ✅ Completed |
-| `04-endpoint-hardening/` | Windows 10 Endpoint Hardening | ✅ Completed |
-| `05-linux-server-hardening/` | Linux Server Hardening (UFW, Fail2Ban, auditd) | ✅ Completed |
-| `06-active-directory-lab/` | Active Directory Domain Deployment & Administration | ✅ Completed |
-| Upcoming | SIEM, Threat Intel, Threat Hunting, IR, Forensics, Cloud Security, Purple Team | 🔜 Planned |
+| ------ | ----- | ------ |
+| [`00-lab-foundation/`](00-lab-foundation) | Lab Foundation & Infrastructure Setup | ✅ Completed |
+| [`01-monitoring-infrastructure/`](01-monitoring-infrastructure) | Network Traffic Monitoring (TShark, Zeek, Suricata) | ✅ Completed |
+| [`02-threat-detection/`](02-threat-detection) | Network Monitoring & Threat Detection | ✅ Completed |
+| [`03-network-protection-layer/`](03-network-protection-layer) | Network Protection Layer (pfSense + Suricata IPS + pfBlockerNG) | ✅ Completed |
+| [`04-endpoint-hardening/`](04-endpoint-hardening) | Windows 10 Endpoint Hardening | ✅ Completed |
+| [`05-linux-server-hardening/`](05-linux-server-hardening) | Linux Server Hardening (UFW, Fail2Ban, auditd) | ✅ Completed |
+| [`06-active-directory-lab/`](06-active-directory-lab) | Active Directory Domain Deployment & Administration | ✅ Completed |
+| [`07-splunk-siem/`](07-splunk-siem) | Splunk SIEM Deployment & Detection Engineering (Universal Forwarder, SPL detections) | ✅ Completed |
+| Upcoming | Threat Intel, Threat Hunting, IR, Forensics, Cloud Security, Purple Team | 🔜 Planned |
 
 ---
 
 ## 🏗️ Lab Architecture
 
 **Infrastructure Components**
+
 - Defense Platform: Ubuntu Server 22.04
+- SIEM: Splunk Enterprise on a dedicated Ubuntu Server 22.04 VM
 - Monitored Endpoints: Windows 10, Ubuntu Desktop
-- Identity Infrastructure: Windows Server 2019 Active Directory Domain Controller
+- Identity Infrastructure: Windows Server 2019 Active Directory Domain Controller (Splunk Universal Forwarder installed)
 - Virtualization: VirtualBox
 - Network Segmentation: NAT + Host-Only + Internal networks
 - Firewall & IPS: pfSense + Suricata Inline IPS
@@ -39,6 +43,7 @@ I'm building a hands-on Security Operations Center (SOC) home lab from scratch a
 ## 🎯 Skills Progress
 
 ### ✅ Completed
+
 - Virtual lab infrastructure setup
 - Basic network configuration and segmentation
 - Suricata installation, configuration, IDS/IPS testing
@@ -51,14 +56,20 @@ I'm building a hands-on Security Operations Center (SOC) home lab from scratch a
 - Active Directory Domain Services deployment & forest promotion
 - Domain-joining Windows endpoints and provisioning domain user accounts
 - Kerberos/NTLM authentication verification via PowerShell and CLI tools
+- Splunk Enterprise deployment, static network configuration, and firewall setup
+- Universal Forwarder deployment and Windows Security event ingestion filtering
+- SPL detection searches for account creation, failed logons, and Kerberos activity mapped to MITRE ATT&CK
+- Attack simulation to validate a detection end to end (account creation, Event ID 4720)
 
 ### 🔄 Currently Learning
-- SIEM ingestion pipeline design (logs → ELK/Wazuh)
+
+- Splunk scheduled alerts and dashboards
+- Forwarding endpoint and network logs (Windows 10, pfSense/Suricata) for cross-source correlation
 - IDS/IPS tuning
 - Network access control
 
 ### ⏳ Upcoming
-- SIEM deployment (ELK Stack or Wazuh)
+
 - Threat intelligence integration
 - Threat hunting methodology
 - Incident response workflows
@@ -71,6 +82,7 @@ I'm building a hands-on Security Operations Center (SOC) home lab from scratch a
 ## 📂 Portfolio Structure
 
 **Active**
+
 - `00-lab-foundation/` — Core VM and network foundation for the lab
 - `01-monitoring-infrastructure/` — Network traffic monitoring with TShark, Zeek, Suricata
 - `02-threat-detection/` — Threat detection rules and analysis
@@ -78,9 +90,10 @@ I'm building a hands-on Security Operations Center (SOC) home lab from scratch a
 - `04-endpoint-hardening/` — Windows 10 endpoint hardening
 - `05-linux-server-hardening/` — Linux server hardening (UFW, Fail2Ban, auditd)
 - `06-active-directory-lab/` — Active Directory domain deployment, client integration, and authentication validation
+- `07-splunk-siem/` — Splunk SIEM deployment, log pipeline from the Domain Controller, and SPL detection engineering
 
 **Planned**
-- `07-siem-detections/`
+
 - `08-threat-intelligence/`
 - `09-threat-hunting/`
 - `10-incident-response/`
@@ -95,13 +108,17 @@ I'm building a hands-on Security Operations Center (SOC) home lab from scratch a
 ## 🛠️ Technologies & Tools
 
 **Currently Using**
+
 - VirtualBox, Ubuntu Server 22.04, Windows 10, Windows Server 2019
 - Wireshark, Zeek, Suricata, Nmap
 - pfSense firewall, pfBlockerNG GeoIP filtering
 - Active Directory Domain Services, DNS, Group Policy fundamentals
+- Splunk Enterprise, Splunk Universal Forwarder, SPL
+- MITRE ATT&CK for detection mapping
 
 **Planned**
-- ELK Stack, Wazuh
+
+- Wazuh, ELK Stack
 - Volatility, KAPE, OSQuery, MISP
 - AWS logging & monitoring
 - Atomic Red Team
@@ -111,6 +128,7 @@ I'm building a hands-on Security Operations Center (SOC) home lab from scratch a
 ## 📈 Goals
 
 By the end of this project, I aim to have:
+
 - A complete SOC-style home lab
 - 20–30 custom detection rules
 - A working SIEM with dashboards
@@ -119,13 +137,12 @@ By the end of this project, I aim to have:
 - Basic incident response playbooks
 - Documented investigations and lab reports
 
-**Career Target:** Entry-Level SOC Analyst / Junior Security Engineer
-
 ---
 
 ## 📺 Learning Sources
 
 This portfolio is based on:
+
 - The Cyber Defense Mastery series by TechSky
 - Additional blogs, documentation, and labs I explore independently
 
