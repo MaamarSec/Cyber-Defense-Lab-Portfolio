@@ -5,7 +5,7 @@ I'm building a hands-on Security Operations Center (SOC) home lab from scratch a
 - **Created by:** MaamarSec
 - **Status:** 🚧 In Progress
 - **Started:** April 2026
-- **Career Target:** Entry-Level SOC Analyst / Junior Security Engineer
+- **Contact:** maamar.sec@outlook.com
 
 ---
 
