@@ -37,7 +37,7 @@ The project covers VM provisioning, static network configuration (including a re
 
 1. **Cloning:** Right-clicked the existing `Ubuntu-Server` VM in VirtualBox → **Clone** → selected **Current Machine State** and **Full Clone**, with **Generate new MAC addresses** enabled to avoid network conflicts with the original VM. Named the result `Splunk-SIEM`.
 
-   ![Splunk-SIEM VM listed in VirtualBox Manager](screenshots/Splunk-SIEM_VM_in_VirtualBox_Manager.png)
+   ![Splunk-SIEM VM listed in VirtualBox Manager](screenshots/01-splunk-siem-vm-in-virtualbox.png)
 
 2. **Hostname:** Set the hostname to `splunk-siem` via `hostnamectl` to distinguish it clearly from the original Ubuntu-Server box in logs and SSH sessions.
 
@@ -66,7 +66,7 @@ The project covers VM provisioning, static network configuration (including a re
              - 8.8.8.8
    ```
 
-   ![Static IP 192.168.56.15 confirmed via ip a, verified remotely over SSH](screenshots/static-ip-verification-192.168.56.15.png)
+   ![Static IP 192.168.56.15 confirmed via ip a, verified remotely over SSH](screenshots/02-static-ip-verification.png)
 
 ---
 
@@ -88,12 +88,12 @@ By default, `ufw` on the VM only allowed inbound SSH (port 22), which silently b
 sudo ufw allow 8000/tcp
 ```
 
-![UFW status showing port 8000/tcp now allowed for Splunk Web](screenshots/splunk_ufw_allow_port_8000.png)
+![UFW status showing port 8000/tcp now allowed for Splunk Web](screenshots/03-splunk-ufw-allow-port-8000.png)
 
 Splunk Web then loaded correctly from the host browser at `http://192.168.56.15:8000`, and the `admin` login gave access to the home dashboard.
 
-![Splunk Web login page loading successfully](screenshots/splunk_web_login_page.png)
-![Splunk home dashboard after logging in as admin](screenshots/splunk_home_dashboard.png)
+![Splunk Web login page loading successfully](screenshots/04-splunk-web-login-page.png)
+![Splunk home dashboard after logging in as admin](screenshots/05-splunk-home-dashboard.png)
 
 ---
 
@@ -116,7 +116,7 @@ sudo ufw allow 9997/tcp
 sudo ss -tlnp | grep 9997
 ```
 
-![UFW rules and splunkd bound to the receiver port](screenshots/02-ubuntu-firewall-and-splunkd-port-listener.png)
+![UFW rules and splunkd bound to the receiver port](screenshots/07-ubuntu-firewall-and-splunkd-port-listener.png)
 
 #### 2. Ingestion Filtering (`inputs.conf`)
 
@@ -138,7 +138,7 @@ whitelist = 4624,4625,4720,4768
 
 `whitelist` limits ingestion to the four Event IDs above, `start_from = oldest` with `current_only = 0` also backfills existing historical events, and `evt_resolve_ad_obj = 1` resolves Active Directory object identifiers to readable names.
 
-![inputs.conf Security log whitelist on DC01](screenshots/03-inputs-conf-security-log-whitelist.png)
+![inputs.conf Security log whitelist on DC01](screenshots/08-inputs-conf-security-log-whitelist.png)
 
 #### 3. Forwarder Target Routing (`outputs.conf`)
 
@@ -152,7 +152,7 @@ defaultGroup = primary_indexers
 server = 192.168.56.15:9997
 ```
 
-![outputs.conf target indexer definition on DC01](screenshots/04-outputs-conf-target-indexer.png)
+![outputs.conf target indexer definition on DC01](screenshots/09-outputs-conf-target-indexer.png)
 
 #### 4. Forwarder Service & Connectivity Validation
 
@@ -162,7 +162,7 @@ Confirmed the forwarder service was running on `DC01` and that the indexer was r
 Test-NetConnection -ComputerName 192.168.56.15 -Port 9997
 ```
 
-![Forwarder service status and Test-NetConnection result](screenshots/05-dc01-forwarder-service-and-network-test.png)
+![Forwarder service status and Test-NetConnection result](screenshots/10-dc01-forwarder-service-and-network-test.png)
 
 ---
 
@@ -174,15 +174,15 @@ To validate that the pipeline responds to suspicious endpoint activity, an Activ
 net user FakeTestUser <TestPassword> /add
 ```
 
-![Account creation command executed on DC01](screenshots/06-dc01-account-creation-trigger.png)
+![Account creation command executed on DC01](screenshots/11-dc01-account-creation-trigger.png)
 
 **Pipeline audit:** Over 8,600 events from host `DC01` were confirmed as ingested into Splunk Enterprise.
 
-![Successful ingestion of 8,600+ AD security events from DC01](screenshots/07-splunk-log-ingestion-dc01-success.png)
+![Successful ingestion of 8,600+ AD security events from DC01](screenshots/12-splunk-log-ingestion-dc01-success.png)
 
 **Detection confirmed:** The simulated account creation appears in Splunk as Event ID 4720, surfaced by the first search below.
 
-![Event ID 4720 for FakeTestUser detected in Splunk](screenshots/08-spl-4720-detection-result.png)
+![Event ID 4720 for FakeTestUser detected in Splunk](../investigations/01-unauthorized-account-creation/screenshots/4720-account-creation-detection.png)
 
 ---
 
