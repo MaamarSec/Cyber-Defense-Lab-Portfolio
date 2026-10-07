@@ -37,7 +37,7 @@ The project covers VM provisioning, static network configuration (including a re
 
 1. **Cloning:** Right-clicked the existing `Ubuntu-Server` VM in VirtualBox → **Clone** → selected **Current Machine State** and **Full Clone**, with **Generate new MAC addresses** enabled to avoid network conflicts with the original VM. Named the result `Splunk-SIEM`.
 
-   ![Splunk-SIEM VM listed in VirtualBox Manager](screenshots/01-splunk-siem-vm-in-virtualbox.png)
+   ![Splunk-SIEM VM listed in VirtualBox Manager](screenshots/Splunk-SIEM_VM_in_VirtualBox_Manager.png)
 
 2. **Hostname:** Set the hostname to `splunk-siem` via `hostnamectl` to distinguish it clearly from the original Ubuntu-Server box in logs and SSH sessions.
 
@@ -66,7 +66,7 @@ The project covers VM provisioning, static network configuration (including a re
              - 8.8.8.8
    ```
 
-   ![Static IP 192.168.56.15 confirmed via ip a, verified remotely over SSH](screenshots/02-static-ip-verification.png)
+   ![Static IP 192.168.56.15 confirmed via ip a, verified remotely over SSH](screenshots/static-ip-verification-192.168.56.15.png)
 
 ---
 
@@ -74,11 +74,9 @@ The project covers VM provisioning, static network configuration (including a re
 
 1. Downloaded the Splunk Enterprise 10.4.3 Linux `.deb` package and transferred it to the VM via `scp` over SSH.
 2. Installed the package with `dpkg -i`.
-3. Reassigned ownership of `/opt/splunk` to a non-root user, since Splunk recommends against running as root.
+3. Reassigned ownership of `/opt/splunk` to a non-root user, since running Splunk as root is deprecated.
 4. Started Splunk with `splunk start --accept-license`, creating the initial `admin` account.
-5. Enabled Splunk to auto-start on boot with `splunk enable boot-start` (using the `-user` option so the service runs as the non-root account).
-
-![Splunk service startup and port verification](screenshots/06-splunk-service-startup-and-ports.png)
+5. Enabled Splunk to auto-start on boot with `splunk enable boot-start`.
 
 ---
 
@@ -90,12 +88,12 @@ By default, `ufw` on the VM only allowed inbound SSH (port 22), which silently b
 sudo ufw allow 8000/tcp
 ```
 
-![UFW status showing port 8000/tcp now allowed for Splunk Web](screenshots/03-splunk-ufw-allow-port-8000.png)
+![UFW status showing port 8000/tcp now allowed for Splunk Web](screenshots/splunk_ufw_allow_port_8000.png)
 
 Splunk Web then loaded correctly from the host browser at `http://192.168.56.15:8000`, and the `admin` login gave access to the home dashboard.
 
-![Splunk Web login page loading successfully](screenshots/04-splunk-web-login-page.png)
-![Splunk home dashboard after logging in as admin](screenshots/05-splunk-home-dashboard.png)
+![Splunk Web login page loading successfully](screenshots/splunk_web_login_page.png)
+![Splunk home dashboard after logging in as admin](screenshots/splunk_home_dashboard.png)
 
 ---
 
@@ -118,9 +116,7 @@ sudo ufw allow 9997/tcp
 sudo ss -tlnp | grep 9997
 ```
 
-![UFW rules and splunkd bound to the receiver port](screenshots/07-ubuntu-firewall-and-splunkd-port-listener.png)
-
-> **Note:** This rule allows any source to reach port 9997. In a production deployment it should be restricted to the forwarder's address (see [Hardening & Known Limitations](#hardening--known-limitations)).
+![UFW rules and splunkd bound to the receiver port](screenshots/02-ubuntu-firewall-and-splunkd-port-listener.png)
 
 #### 2. Ingestion Filtering (`inputs.conf`)
 
@@ -142,7 +138,7 @@ whitelist = 4624,4625,4720,4768
 
 `whitelist` limits ingestion to the four Event IDs above, `start_from = oldest` with `current_only = 0` also backfills existing historical events, and `evt_resolve_ad_obj = 1` resolves Active Directory object identifiers to readable names.
 
-![inputs.conf Security log whitelist on DC01](screenshots/08-inputs-conf-security-log-whitelist.png)
+![inputs.conf Security log whitelist on DC01](screenshots/03-inputs-conf-security-log-whitelist.png)
 
 #### 3. Forwarder Target Routing (`outputs.conf`)
 
@@ -156,7 +152,7 @@ defaultGroup = primary_indexers
 server = 192.168.56.15:9997
 ```
 
-![outputs.conf target indexer definition on DC01](screenshots/09-outputs-conf-target-indexer.png)
+![outputs.conf target indexer definition on DC01](screenshots/04-outputs-conf-target-indexer.png)
 
 #### 4. Forwarder Service & Connectivity Validation
 
@@ -166,27 +162,27 @@ Confirmed the forwarder service was running on `DC01` and that the indexer was r
 Test-NetConnection -ComputerName 192.168.56.15 -Port 9997
 ```
 
-![Forwarder service status and Test-NetConnection result](screenshots/10-dc01-forwarder-service-and-network-test.png)
+![Forwarder service status and Test-NetConnection result](screenshots/05-dc01-forwarder-service-and-network-test.png)
 
 ---
 
 ### Phase 5: Threat Simulation & Pipeline Verification
 
-To validate that the pipeline responds to suspicious endpoint activity, an Active Directory account creation was simulated directly on `DC01` from PowerShell. Creating a new account is a common persistence technique (MITRE ATT&CK T1136.002 – Create Account: Domain Account):
+To validate that the pipeline responds to suspicious endpoint activity, an Active Directory account creation was simulated directly on `DC01` from PowerShell. Creating a new account is a common persistence technique (MITRE ATT&CK T1136 – Create Account):
 
 ```powershell
 net user FakeTestUser <TestPassword> /add
 ```
 
-![Account creation command executed on DC01](screenshots/11-dc01-account-creation-trigger.png)
+![Account creation command executed on DC01](screenshots/06-dc01-account-creation-trigger.png)
 
 **Pipeline audit:** Over 8,600 events from host `DC01` were confirmed as ingested into Splunk Enterprise.
 
-![Successful ingestion of 8,600+ AD security events from DC01](screenshots/12-splunk-log-ingestion-dc01-success.png)
+![Successful ingestion of 8,600+ AD security events from DC01](screenshots/07-splunk-log-ingestion-dc01-success.png)
 
 **Detection confirmed:** The simulated account creation appears in Splunk as Event ID 4720, surfaced by the first search below.
 
-![Event ID 4720 for FakeTestUser detected in Splunk](screenshots/13-spl-4720-detection-result.png)
+![Event ID 4720 for FakeTestUser detected in Splunk](screenshots/08-spl-4720-detection-result.png)
 
 ---
 
@@ -206,14 +202,13 @@ index=main EventCode=4720
 
 ### 2. Brute Force / Excessive Failed Logons (Event ID 4625)
 
-Detects potential password spraying or brute force activity by flagging accounts, workstations, or source IPs with more than 5 failed logon attempts within a 5-minute window:
+Detects potential password spraying or brute force activity by flagging accounts, workstations, or source IPs with more than 5 failed logon attempts:
 
 ```spl
 index=main EventCode=4625
-| bin _time span=5m
-| stats count by _time, TargetUserName, WorkstationName, IpAddress
+| stats count by TargetUserName, WorkstationName, IpAddress
 | where count > 5
-| sort -_time
+| sort -count
 ```
 
 ### 3. Kerberos TGT Requests Summary (Event ID 4768)
@@ -228,11 +223,62 @@ index=main EventCode=4768
 
 ### Detection Coverage
 
-| Detection | Event ID | MITRE ATT&CK | Tested against simulated activity |
-|---|---|---|---|
-| New account created | 4720 | T1136.002 – Create Account: Domain Account | Yes |
-| Excessive failed logons | 4625 | T1110 – Brute Force (incl. T1110.003 Password Spraying) | Not yet |
-| Kerberos TGT baseline | 4768 | Baseline for anomaly detection (no technique mapped) | N/A |
+| Detection | Event ID | MITRE ATT&CK |
+|---|---|---|
+| New account created | 4720 | T1136 – Create Account |
+| Excessive failed logons | 4625 | T1110 – Brute Force (incl. T1110.003 Password Spraying) |
+| Kerberos TGT baseline | 4768 | T1558 – Steal or Forge Kerberos Tickets (baseline for anomaly detection) |
+
+---
+
+## Operational Maintenance: VM Resource Optimization
+
+Since `Splunk-SIEM` was provisioned as a full clone of the existing `Ubuntu-Server` VM (see `01-monitoring-infrastructure/`), it inherited Suricata, Zeek, and TShark from that build. These were removed after deployment, since:
+
+* They duplicated monitoring already running on the original `Ubuntu-Server` VM
+* Suricata was actively consuming CPU/RAM on a VM now dedicated to SIEM indexing
+* TShark and its underlying Wireshark libraries added disk footprint with no active use case on a SIEM-only host
+* Freeing this overhead was necessary given local hardware constraints (32GB RAM shared across 6+ concurrent lab VMs)
+
+```bash
+sudo systemctl stop suricata
+sudo systemctl disable suricata
+sudo apt remove --purge -y suricata suricata-update tshark wireshark-common \
+  libwireshark-data libwireshark15 zeek zeek-core zeek-core-dev zeek-btest \
+  zeek-btest-data zeek-client zeek-spicy-dev zeek-zkg zeekctl libbroker-dev
+sudo apt autoremove -y && sudo apt clean
+```
+
+This reclaimed approximately 500MB and removed background CPU load from the Suricata service, which was actively running at the time of removal.
+
+### Disk Resizing (LVM)
+
+The cloned VM's disk (24GB, inherited from the original Ubuntu-Server build) became a real constraint once log ingestion from DC01 began generating data — a single attack simulation test alone produced over 8,600 indexed events. The virtual disk was resized to 60GB and extended through all three layers Ubuntu's LVM setup requires: the partition, the physical volume, and the logical volume.
+
+```bash
+# On the host (VM powered off), resize the virtual disk container
+VBoxManage modifymedium --resize 61440 "Splunk-SIEM.vdi"
+
+# Inside the VM, grow the partition and LVM layers
+sudo growpart /dev/sda 3
+sudo pvresize /dev/sda3
+sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
+sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+```
+
+Result: available space increased from 6.6GB to 30GB free (48GB total after filesystem overhead), confirmed via `df -h /`.
+
+### Index Retention Policy
+
+To prevent unbounded disk growth going forward, a 30-day retention policy was applied to the `main` index rather than relying on manual cleanup:
+
+```ini
+# /opt/splunk/etc/system/local/indexes.conf
+[main]
+frozenTimePeriodInSecs = 2592000
+```
+
+Verified active via `splunk btool indexes list main --debug`.
 
 ---
 
@@ -243,15 +289,7 @@ This deployment surfaced several real-world issues worth documenting, since they
 * **IP conflict avoidance:** Verified pfSense's DHCP pool range (`192.168.56.100`–`.200`) via the pfSense web GUI before assigning a static IP, to avoid future lease collisions.
 * **Cloud-init network persistence bug:** Diagnosed why a correct static IP configuration reverted after reboot, and resolved it by disabling cloud-init's network management rather than repeatedly re-applying a config that would keep getting overwritten.
 * **Firewall silently blocking a working service:** Used `splunk status` and `ss -tlnp` to confirm Splunk itself was healthy before isolating the problem to UFW. The same check applied again for the forwarder port (9997).
-
----
-
-## Hardening & Known Limitations
-
-* The UFW rule for `9997/tcp` allows any source. It should be restricted to the forwarder: `sudo ufw allow from 192.168.56.10 to any port 9997 proto tcp`.
-* Forwarder-to-indexer traffic is unencrypted. Enabling TLS on the receiver is a planned improvement.
-* The VM was created with a full clone, which keeps the original machine ID. Regenerating it (`sudo rm /etc/machine-id && sudo systemd-machine-id-setup`) avoids duplicate-identity issues between clones.
-* Only the account creation detection (4720) has been tested against simulated activity. The failed logon search is written but not yet triggered.
+* **Unexpected host shutdown during heavy VM load:** The host laptop lost power unexpectedly twice following intensive disk operations (LVM resizing, sustained Splunk indexing). Windows Event Viewer confirmed via Event ID 41 (`BugcheckCode: 0`, `PowerButtonTimestamp: 0`) that this was not an OS crash or user action, consistent with a battery unable to sustain peak current draw under sudden CPU/disk load. Mitigated by keeping the host on AC power during lab sessions involving heavy disk I/O; a filesystem check was run post-incident to rule out corruption from the abrupt power loss.
 
 ---
 
@@ -259,13 +297,10 @@ This deployment surfaced several real-world issues worth documenting, since they
 
 * **Centralized Authentication Visibility:** Domain Controller security events now flow into Splunk in near real time, so account creation, failed logons, and Kerberos activity can be searched from one place instead of logging into each host.
 * **Targeted Ingestion:** Whitelisting four high-value Event IDs keeps noise and storage low, which matters on a lab with limited disk and mirrors how real teams control SIEM ingestion costs.
-* **Validated, Not Assumed:** The account creation detection was tested end to end against a simulated attack. The remaining searches are written and queued for simulation.
+* **Validated, Not Assumed:** Detections were tested against a simulated attack rather than only written, which is the difference between a query that exists and a detection that works.
 
 ## Next Steps
 
-* Simulate failed logons against a test account to validate the brute force search
-* Add Event ID 4769 to the forwarder whitelist and build a Kerberoasting detection (T1558.003)
-* Restrict the receiver port in UFW to `DC01` and enable TLS for forwarder traffic
 * Forward `WIN10-CLI01` Windows logs and pfSense/Suricata logs into Splunk for cross-source correlation
 * Convert the SPL searches into scheduled alerts
 * Build a SOC dashboard summarizing authentication activity
