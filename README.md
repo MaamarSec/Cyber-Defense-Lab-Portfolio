@@ -170,3 +170,9 @@ This portfolio is based on:
 ## ⚖️ Legal & Ethics
 
 All security activities are carried out strictly within controlled lab environments on systems that I own. This project is dedicated solely to ethical and defensive cybersecurity practices.
+
+
+## License
+
+- **Code and configurations** (scripts, configs, automation): [MIT License](./LICENSE)
+- **Documentation and screenshots** (READMEs, diagrams, write-ups): [CC BY 4.0](./LICENSE-docs)
