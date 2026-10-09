@@ -155,7 +155,6 @@ By the end of this project, I aim to have:
 - Basic incident response playbooks
 - Documented investigations and lab reports
 
-**Career Target:** Entry-Level SOC Analyst / Junior Security Engineer
 
 ---
 
