@@ -11,7 +11,7 @@
 I'm building a hands-on Security Operations Center (SOC) home lab from scratch — not following a single tutorial, but designing, breaking, and fixing real infrastructure: Active Directory, a Splunk SIEM ingesting live authentication events, pfSense/Suricata network defense, and hardened Windows and Linux endpoints. Every lab below is documented with the actual commands run, the actual errors hit, and how they were resolved.
 
 **Created by:** MaamarSec | **Status:** 🚧 In Progress | **Started:** April 2026
-**Contact:** maamar.sec@outlook.com
+**Contact:** maamar[dot]sec[at]outlook[dot]com
 
 ---
 
@@ -155,7 +155,6 @@ By the end of this project, I aim to have:
 - Basic incident response playbooks
 - Documented investigations and lab reports
 
-**Career Target:** Entry-Level SOC Analyst / Junior Security Engineer
 
 ---
 
