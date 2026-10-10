@@ -39,11 +39,15 @@ index=main EventCode=4720
 
    - **Subject (who created the account):** `CDMDC\Administrator`, SID `S-1-5-21-888440556-1904330955-549321856-500`, Logon ID `0x510C7`
    - **New account:** `FakeTestUser`, SID `S-1-5-21-888440556-1904330955-549321856-1105`, Account Domain `CDMDC`
-   - **Account Control flags:** `Account Disabled`, `'Password Not Required' - Enabled`, `'Normal Account' - Enabled`
+   - **Account Control flags at creation:** `Account Disabled`, `'Password Not Required' - Enabled`, `'Normal Account' - Enabled` (`New UAC Value: 0x15`)
 
 3. **Checked the creator's privilege level.** The Subject SID ends in RID `-500`, the well-known relative identifier for the built-in domain Administrator account, confirming this was created by a privileged identity rather than a standard user account that shouldn't have account-creation rights.
 
-4. **Flagged a secondary finding.** Independent of the account's legitimacy, the `'Password Not Required'` UAC flag on the new account is a weak configuration in its own right â€” it would allow the account to be enabled later with no password requirement. This is worth noting as a finding even for an account ultimately confirmed as an authorized test.
+4. **Interpreted the UAC flags, and verified rather than assumed.** At first glance, `Account Disabled` and `'Password Not Required' - Enabled` look like a weak configuration. Event ID 4720 only records the account's state at the instant of creation, however, before Windows applies the password and enables the account in follow-up operations. The live account was checked directly with `Get-ADUser FakeTestUser -Properties PasswordNotRequired, Enabled`, which returned `Enabled: True` and `PasswordNotRequired: False`. The creation-time flags were a logging artifact, not a misconfiguration.
+
+   **Lesson:** a 4720 event alone cannot tell you the account's final state. Confirming it requires querying the directory or ingesting the follow-up events (4722 account enabled, 4738 account changed), neither of which is in the current forwarder whitelist (`4624,4625,4720,4768`).
+
+   ![Get-ADUser output showing FakeTestUser as Enabled with PasswordNotRequired False](screenshots/get-aduser-fakeuser-verification.png)
 
 5. **Correlated against expected activity.** Cross-referenced the event timestamp against the known lab activity log for that session, confirming this matched an intentional attack simulation performed to validate the detection pipeline, not an unexplained or unauthorized event.
 
@@ -72,9 +76,9 @@ Being explicit about the simulated nature of this event is a deliberate choice â
 If this event occurred in a production environment rather than a lab, the following response would be appropriate:
 
 1. **Verify against change management records.** Confirm whether the account creation was tied to an approved onboarding or administrative request.
-2. **Review the account's purpose and owner.** An account created with no display name, no UPN, and no password requirement is inconsistent with a normal provisioning workflow and would warrant direct follow-up with the creating administrator.
-3. **Remediate the weak UAC configuration.** Regardless of legitimacy, enforce a password requirement before the account is ever enabled.
-4. **Expand monitoring.** Pair Event ID 4720 with Event ID 4722 (account enabled) and 4738 (account changed) to track the full lifecycle of newly created accounts, not just their creation.
+2. **Review the account's purpose and owner.** An account created with no display name and no User Principal Name is inconsistent with a normal provisioning workflow and would warrant direct follow-up with the creating administrator.
+3. **Verify the account's current state.** Query the directory (for example `Get-ADUser <name> -Properties Enabled, PasswordNotRequired, MemberOf`) rather than relying on the creation event's flags, and check which groups the account has been added to.
+4. **Expand monitoring.** Add Event ID 4722 (account enabled), 4738 (account changed), and 4728/4732 (added to a security group) to the forwarder whitelist, so the full lifecycle of a new account is visible in Splunk and not just its creation.
 5. **Escalate if unexplained.** If no change record exists and the creating admin cannot account for the action, treat as a potential compromised-credential scenario and escalate per incident response procedures.
 
 ---
