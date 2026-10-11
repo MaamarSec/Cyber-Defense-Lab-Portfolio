@@ -60,6 +60,16 @@ Two `rex` lines pull out who created the account (`SubjectUserName`) and which a
 | Expires | 24 hours |
 | Permissions | Private, owned by `admin` |
 
+The saved settings can be read back directly from Splunk's REST endpoint, which confirms the time window, throttle and severity as stored:
+
+```spl
+| rest /servicesNS/-/-/saved/searches splunk_server=local
+| search title="DET-001*"
+| table title, search, dispatch.earliest_time, alert.digest_mode, alert.suppress, alert.suppress.fields, alert.suppress.period, alert.severity
+```
+
+![Saved-search settings read back through the REST endpoint](screenshots/det-001-rest-api-throttling-audit.png)
+
 ---
 
 ## Validation
