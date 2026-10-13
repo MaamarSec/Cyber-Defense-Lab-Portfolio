@@ -188,46 +188,49 @@ net user FakeTestUser <TestPassword> /add
 
 ## Detection Engineering (SPL Queries)
 
-With ingestion confirmed, the following Search Processing Language (SPL) queries were built for threat detection and SOC monitoring.
+With ingestion confirmed, the following Search Processing Language (SPL) searches were built for threat detection and SOC monitoring. Two of them are now scheduled alerts, documented in [`08-detection-engineering`](../08-detection-engineering/).
+
+> **Field extraction note.** Without a Windows add-on, Splunk in this lab does not extract account names, source addresses or sub-status codes from Windows Security events. They exist only inside the raw `Message` text, so searches that name fields such as `TargetUserName` or `IpAddress` return nothing. The searches below pull the values out with `rex`, after checking the layout of a real event.
 
 ### 1. New User Account Created (Event ID 4720)
 
-Identifies user account creation, extracting the new account name, the creator's identity, and the target host:
+Identifies user account creation, extracting the creator's identity and the new account name. Validated end to end in [DET-001](../08-detection-engineering/DET-001-new-account-created.md).
 
 ```spl
 index=main EventCode=4720
-| table _time, ComputerName, TargetUserName, SubjectUserName, Message
+| rex field=Message "Subject:\s+Security ID:\s+\S+\s+Account Name:\s+(?<SubjectUserName>\S+)"
+| rex field=Message "New Account:\s+Security ID:\s+\S+\s+Account Name:\s+(?<TargetUserName>\S+)"
+| table _time, ComputerName, SubjectUserName, TargetUserName
 | sort -_time
 ```
 
 ### 2. Brute Force / Excessive Failed Logons (Event ID 4625)
 
-Detects potential password spraying or brute force activity by flagging accounts, workstations, or source IPs with more than 5 failed logon attempts:
+Flags 5 or more failed logons for one account from one source within 5 minutes, one row per burst. Validated against real failed-logon events in [DET-002](../08-detection-engineering/DET-002-excessive-failed-logons.md).
 
 ```spl
 index=main EventCode=4625
-| stats count by TargetUserName, WorkstationName, IpAddress
-| where count > 5
-| sort -count
+| rex field=Message "Account For Which Logon Failed:\s+Security ID:\s+\S+\s+Account Name:\s+(?<TargetUserName>\S+)"
+| rex field=Message "Source Network Address:[ \t]*(?<SourceAddress>\S*)"
+| sort 0 _time
+| streamstats time_window=5m count as attempts, min(_time) as window_start by SourceAddress, TargetUserName
+| where attempts >= 5
+| stats max(attempts) as attempts, max(_time) as last_failure by SourceAddress, TargetUserName, window_start
+| rename window_start as first_failure
+| convert ctime(first_failure) ctime(last_failure)
 ```
 
-### 3. Kerberos TGT Requests Summary (Event ID 4768)
+### 3. Kerberos TGT Requests (Event ID 4768): not yet validated
 
-Monitors Kerberos authentication requests across domain accounts to establish an authentication baseline:
-
-```spl
-index=main EventCode=4768
-| stats count by TargetUserName, ServiceName, Status, IpAddress
-| sort -count
-```
+An earlier version of this search referenced fields that do not exist in this data, so it was withdrawn. A working version needs a raw 4768 event to be reviewed first so the extraction matches its real layout. This remains planned.
 
 ### Detection Coverage
 
-| Detection | Event ID | MITRE ATT&CK |
-|---|---|---|
-| New account created | 4720 | T1136 – Create Account |
-| Excessive failed logons | 4625 | T1110 – Brute Force (incl. T1110.003 Password Spraying) |
-| Kerberos TGT baseline | 4768 | T1558 – Steal or Forge Kerberos Tickets (baseline for anomaly detection) |
+| Detection | Event ID | MITRE ATT&CK | Status |
+|---|---|---|---|
+| New account created | 4720 | T1136 - Create Account | Live alert (DET-001) |
+| Excessive failed logons | 4625 | T1110.001 - Password Guessing | Live alert (DET-002) |
+| Kerberos TGT baseline | 4768 | T1558 - Steal or Forge Kerberos Tickets (baseline) | Planned |
 
 ---
 
@@ -289,18 +292,19 @@ This deployment surfaced several real-world issues worth documenting, since they
 * **IP conflict avoidance:** Verified pfSense's DHCP pool range (`192.168.56.100`–`.200`) via the pfSense web GUI before assigning a static IP, to avoid future lease collisions.
 * **Cloud-init network persistence bug:** Diagnosed why a correct static IP configuration reverted after reboot, and resolved it by disabling cloud-init's network management rather than repeatedly re-applying a config that would keep getting overwritten.
 * **Firewall silently blocking a working service:** Used `splunk status` and `ss -tlnp` to confirm Splunk itself was healthy before isolating the problem to UFW. The same check applied again for the forwarder port (9997).
-* **Unexpected host shutdown during heavy VM load:** The host laptop lost power unexpectedly twice following intensive disk operations (LVM resizing, sustained Splunk indexing). Windows Event Viewer confirmed via Event ID 41 (`BugcheckCode: 0`, `PowerButtonTimestamp: 0`) that this was not an OS crash or user action, consistent with a battery unable to sustain peak current draw under sudden CPU/disk load. Mitigated by keeping the host on AC power during lab sessions involving heavy disk I/O; a filesystem check was run post-incident to rule out corruption from the abrupt power loss.
+* **Unexpected host shutdown during heavy VM load:** The host laptop lost power unexpectedly twice following intensive disk operations (LVM resizing, sustained Splunk indexing). Windows Event Viewer showed Event ID 41 with `BugcheckCode: 0` and `PowerButtonTimestamp: 0`, which means it was not an OS crash or a user action. That fits either a battery unable to sustain peak current draw under sudden load or thermal protection cutting power, and the laptop was later noticed running hot with several VMs up. The cause was not determined. Mitigations: keep the host on AC power and on a hard surface, and run only the VMs a test needs.
 
 ---
 
 ## SOC Analyst Takeaways
 
-* **Centralized Authentication Visibility:** Domain Controller security events now flow into Splunk in near real time, so account creation, failed logons, and Kerberos activity can be searched from one place instead of logging into each host.
+* **Centralized Authentication Visibility:** Domain Controller security events now flow into Splunk in near real time, so account creation and failed-logon activity can be searched from one place instead of logging into each host.
 * **Targeted Ingestion:** Whitelisting four high-value Event IDs keeps noise and storage low, which matters on a lab with limited disk and mirrors how real teams control SIEM ingestion costs.
 * **Validated, Not Assumed:** Detections were tested against a simulated attack rather than only written, which is the difference between a query that exists and a detection that works.
 
 ## Next Steps
 
+* Scheduled alerts for the account-creation and failed-logon searches are built and documented in [`08-detection-engineering`](../08-detection-engineering/)
+* Review a raw 4768 event and write a validated Kerberos detection
 * Forward `WIN10-CLI01` Windows logs and pfSense/Suricata logs into Splunk for cross-source correlation
-* Convert the SPL searches into scheduled alerts
 * Build a SOC dashboard summarizing authentication activity

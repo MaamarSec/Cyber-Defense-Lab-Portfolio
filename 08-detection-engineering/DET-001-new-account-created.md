@@ -2,7 +2,7 @@
 
 | Field | Detail |
 |---|---|
-| **Status** | Live in lab |
+| **Status** | Live in lab (runs while the Splunk Enterprise trial licence is valid, until Nov 11, 2026) |
 | **Severity** | High (stored as `alert.severity = 4`) |
 | **Data source** | Windows Security log from `DC01`, forwarded by the Splunk Universal Forwarder |
 | **Event ID** | 4720 - A user account was created |
@@ -131,6 +131,7 @@ index=_internal sourcetype=scheduler savedsearch_name="DET-001*"
 * **Detection delay is up to about 20 minutes.** The alert runs every 15 minutes and depends on the forwarder being up.
 * **Legitimate onboarding also triggers it.** In production, known provisioning accounts would be excluded or the alert would be matched against change tickets.
 * **The only action is Triggered Alerts.** Email, webhook or ticketing would be added in a production deployment.
+* **Licence dependency.** Splunk Free does not include alerting, and the instance warns when an alert is saved that the scheduled search will not run after the trial licence expires (Nov 11, 2026 on this instance). The SPL itself is portable to any licensed Splunk deployment.
 * **Display quirk.** The Alerts list page reports "2 Actions", but the saved configuration contains a single action (`actions = list`). I did not investigate it further.
 
 ---
