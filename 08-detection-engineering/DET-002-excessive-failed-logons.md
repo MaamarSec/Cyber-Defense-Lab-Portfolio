@@ -139,11 +139,11 @@ The first extraction idea was to take the account name from the top of the event
 
 ### 3. Two bursts merged into one row
 
-**Problem.** Twelve failures for `AlertTestUser03` came from two loops about eleven minutes apart. The results showed one row spanning 12:12:27 to 12:23:16, which cannot satisfy a 5-minute rule.
+**Problem.** Twelve failures for `AlertTestUser03` came from two loops of six, starting about nine minutes apart (12:12:27 and 12:21:01). The results showed one row spanning 12:12:27 to 12:23:16, which cannot satisfy a 5-minute rule.
 
 **Cause.** The final `stats` grouped only by source and account, so it took the earliest start from one burst and the latest end from the other.
 
-**Fix.** Grouping by `window_start` gives each burst its own row. This change is in the stored alert. It has not yet been checked against the `AlertTestUser03` events.
+**Fix.** Grouping by `window_start` gives each burst its own row. A 7-day search over the same events then returned two rows for `AlertTestUser03`, each with 6 attempts: 12:12:27 to 12:14:22 and 12:21:01 to 12:23:16.
 
 ### 4. Failures that never became 4625 events
 
@@ -164,7 +164,6 @@ The first extraction idea was to take the account name from the top of the event
 * **The throttle hides repeat bursts.** A second burst by the same account and source within 30 minutes does not alert again.
 * **Only `DC01` is monitored.** Failed logons on other machines are not collected.
 * **Late events can be missed.** The 10-minute lookback does not reach events indexed after an outage.
-* **Burst splitting is unverified.** See tuning journal item 3.
 * **Licence dependency.** Splunk Free does not include alerting, and the instance warns when an alert is saved that the scheduled search will not run after the trial licence expires (Nov 11, 2026 on this instance). The SPL itself is portable to any licensed Splunk deployment.
 
 ---
