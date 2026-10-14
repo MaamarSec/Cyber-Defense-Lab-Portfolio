@@ -16,6 +16,7 @@ The project covers VM provisioning, static network configuration (including a re
 * **Web Interface:** `8000/tcp`
 * **Forwarder Receiver Port:** `9997/tcp`
 * **Log Source:** Domain Controller `DC01` (`192.168.56.10`) running the Splunk Universal Forwarder
+* **Licence:** Splunk Enterprise trial, expiring Nov 11, 2026. Splunk Free does not include alerting, so the scheduled alerts in [`08-detection-engineering`](../08-detection-engineering/) run only while the trial is valid
 
 ---
 
@@ -27,7 +28,7 @@ The project covers VM provisioning, static network configuration (including a re
 4. **Firewall Configuration:** Open the Splunk Web port through UFW, which was blocking access by default.
 5. **Log Pipeline:** Enable the forwarder receiver, deploy the Universal Forwarder on `DC01`, and restrict ingestion to high-value authentication events.
 6. **Threat Simulation:** Trigger a real Active Directory account creation event and confirm it reaches Splunk.
-7. **Detection Engineering:** Build SPL searches for account creation, brute force, and Kerberos activity.
+7. **Detection Engineering:** Build and validate SPL searches for account creation and failed logons, and turn them into scheduled alerts (a Kerberos detection is planned).
 
 ---
 
@@ -256,7 +257,7 @@ This reclaimed approximately 500MB and removed background CPU load from the Suri
 
 ### Disk Resizing (LVM)
 
-The cloned VM's disk (24GB, inherited from the original Ubuntu-Server build) became a real constraint once log ingestion from DC01 began generating data — a single attack simulation test alone produced over 8,600 indexed events. The virtual disk was resized to 60GB and extended through all three layers Ubuntu's LVM setup requires: the partition, the physical volume, and the logical volume.
+The cloned VM's disk (24GB, inherited from the original Ubuntu-Server build) became a real constraint once log ingestion from DC01 began. The initial backfill of existing events alone produced over 8,600 indexed events, because the input reads the log from the beginning. The virtual disk was resized to 60GB and extended through all three layers Ubuntu's LVM setup requires: the partition, the physical volume, and the logical volume.
 
 ```bash
 # On the host (VM powered off), resize the virtual disk container
