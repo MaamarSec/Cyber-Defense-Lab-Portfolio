@@ -91,8 +91,6 @@ A short lifetime for an account nobody expected is the pattern worth escalating.
 
 The overlapping window means the same deletion is seen by two consecutive runs. The throttle on `TargetUserName` is what stops it alerting twice.
 
-After saving, read the settings back with the same REST search used for DET-002 (`title="DET-003*"`) and paste the output below.
-
 ## Validation
 
 ### Ingestion test (2026-10-16)
@@ -109,7 +107,7 @@ AlertTestUser08 was created and deleted on DC01. One 4726 reached Splunk (displa
 
 ### Alert firing test (2026-10-16)
 
-Run after the alert is saved, with a new account name (AlertTestUser09).
+Run after the alert was saved, with a new account name (AlertTestUser09).
 
 Run on DC01 in an elevated PowerShell session:
 
@@ -120,7 +118,7 @@ Get-ADUser -Identity "AlertTestUser09"      # expect: cannot find an object
 Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4726} -MaxEvents 3
 ```
 
-Record here:
+Results:
 
 - DC01 Security log: `Get-WinEvent` shows TimeCreated 16.10.2026 19:55:54 (whole seconds) for the AlertTestUser09 deletion, matching Splunk.
 - Splunk: one event for AlertTestUser09 at 19:55:54.131, host DC01, `Actor` = Administrator, `TargetUserName` = AlertTestUser09. The time matches the Windows log to the second.
