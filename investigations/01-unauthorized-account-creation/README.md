@@ -27,6 +27,8 @@ index=main EventCode=4720
 | sort -_time
 ```
 
+> **Note (2026-10-17).** This is the search as originally run, before the `rex` extraction was added. Splunk does not extract the name fields in this lab (see [DET-001](../../08-detection-engineering/DET-001-new-account-created.md)), so the `TargetUserName` and `SubjectUserName` columns would be blank when it is run as written, and the account names are read from the raw `Message` text in the next step. The working version with `rex` is in DET-001.
+
 ![Splunk search results showing the FakeTestUser account creation event](screenshots/4720-account-creation-detection.png)
 
 ---
@@ -45,7 +47,7 @@ index=main EventCode=4720
 
 4. **Interpreted the UAC flags, and verified rather than assumed.** At first glance, `Account Disabled` and `'Password Not Required' - Enabled` look like a weak configuration. Event ID 4720 only records the account's state at the instant of creation, however, before Windows applies the password and enables the account in follow-up operations. The live account was checked directly with `Get-ADUser FakeTestUser -Properties PasswordNotRequired, Enabled`, which returned `Enabled: True` and `PasswordNotRequired: False`. The creation-time flags were a logging artifact, not a misconfiguration.
 
-   **Lesson:** a 4720 event alone cannot tell you the account's final state. Confirming it requires querying the directory or ingesting the follow-up events (4722 account enabled, 4738 account changed), neither of which is in the current forwarder whitelist (`4624,4625,4720,4768`).
+   **Lesson:** a 4720 event alone cannot tell you the account's final state. Confirming it requires querying the directory or searching the follow-up events (4722 account enabled, 4738 account changed). The forwarder sends the Security log without filtering by event ID, so these events can reach Splunk if the DC logs them (4738 events are present in the index as of 2026-10-17; 4722 has not been checked), but no search uses them yet.
 
    ![Get-ADUser output showing FakeTestUser as Enabled with PasswordNotRequired False](screenshots/get-aduser-fakeuser-verification.png)
 
@@ -58,14 +60,14 @@ index=main EventCode=4720
 | Time (UTC+3) | Event |
 |---|---|
 | 13:07:48.369 | `net user FakeTestUser <password> /add` executed on `DC01` by `CDMDC\Administrator` |
-| ~13:08 | Splunk Universal Forwarder on `DC01` ships the Event ID 4720 log entry to the Splunk indexer (`192.168.56.15:9997`) |
-| Same session | Analyst runs the Event ID 4720 SPL search in Splunk Web, confirming the event was ingested and searchable |
+| 16:07:45 | Splunk Universal Forwarder on `DC01` first reads the Security log from the beginning and indexes the Event ID 4720 entry (`192.168.56.15:9997`). An earlier version of this timeline gave about 13:08, but no event in the index was indexed before 16:07:45 |
+| After 16:07:45 | Analyst runs the Event ID 4720 SPL search in Splunk Web, confirming the event was ingested and searchable |
 
 ---
 
 ## Classification: Simulated Test Event (True Positive — Detection Validated)
 
-This event was **intentionally generated** as part of validating the Splunk detection pipeline documented in [`07-splunk-siem`](../../07-splunk-siem/), not an actual unauthorized intrusion. It is classified as a **true positive** in the sense that matters for this exercise: the detection logic correctly identified and surfaced a real account-creation event, with accurate subject/target attribution, within one indexing cycle of the action occurring.
+This event was **intentionally generated** as part of validating the Splunk detection pipeline documented in [`07-splunk-siem`](../../07-splunk-siem/), not an actual unauthorized intrusion. It is classified as a **true positive** in the sense that matters for this exercise: the detection logic correctly identified and surfaced a real account-creation event, with accurate subject/target attribution.
 
 Being explicit about the simulated nature of this event is a deliberate choice — the goal of this write-up is to demonstrate investigative process and accurate classification, not to misrepresent a lab exercise as a real incident.
 
@@ -78,28 +80,13 @@ If this event occurred in a production environment rather than a lab, the follow
 1. **Verify against change management records.** Confirm whether the account creation was tied to an approved onboarding or administrative request.
 2. **Review the account's purpose and owner.** An account created with no display name and no User Principal Name is inconsistent with a normal provisioning workflow and would warrant direct follow-up with the creating administrator.
 3. **Verify the account's current state.** Query the directory (for example `Get-ADUser <name> -Properties Enabled, PasswordNotRequired, MemberOf`) rather than relying on the creation event's flags, and check which groups the account has been added to.
-4. **Expand monitoring.** Add Event ID 4722 (account enabled), 4738 (account changed), and 4728/4732 (added to a security group) to the forwarder whitelist, so the full lifecycle of a new account is visible in Splunk and not just its creation.
+4. **Expand monitoring.** Build detections on Event IDs 4722 (account enabled), 4738 (account changed), and 4728/4732 (added to a security group), so the full lifecycle of a new account is visible in Splunk and not just its creation. The forwarder does not filter by event ID, so these events reach Splunk if the DC logs them; check that the audit policy for account management covers them.
 5. **Escalate if unexplained.** If no change record exists and the creating admin cannot account for the action, treat as a potential compromised-credential scenario and escalate per incident response procedures.
 
 ---
 
 ## Supporting Detections
 
-Two additional SPL searches from the same detection suite provide broader context around this account's subsequent activity, were it to log on:
-
-```spl
-# Failed logon attempts for this or other accounts
-index=main EventCode=4625
-| stats count by TargetUserName, WorkstationName, IpAddress
-| where count > 5
-| sort -count
-```
-
-```spl
-# Kerberos authentication baseline
-index=main EventCode=4768
-| stats count by TargetUserName, ServiceName, Status, IpAddress
-| sort -count
-```
+For failed logons involving an account, see [DET-002](../../08-detection-engineering/DET-002-excessive-failed-logons.md). A Kerberos baseline search is planned but not yet validated (see [07-splunk-siem](../../07-splunk-siem/README.md)).
 
 Full detection engineering detail, including how the log pipeline was built and validated, is documented in [`07-splunk-siem/README.md`](../../07-splunk-siem/README.md).
