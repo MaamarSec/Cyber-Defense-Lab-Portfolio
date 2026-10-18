@@ -16,7 +16,7 @@ The project covers VM provisioning, static network configuration (including a re
 * **Web Interface:** `8000/tcp`
 * **Forwarder Receiver Port:** `9997/tcp`
 * **Log Source:** Domain Controller `DC01` (`192.168.56.10`) running the Splunk Universal Forwarder
-* **Licence:** Splunk Enterprise trial, expiring Nov 11, 2026. Splunk Free does not include alerting, so the scheduled alerts in [`08-detection-engineering`](../08-detection-engineering/) run only while the trial is valid
+* **Licence:** Splunk Developer Personal License (Enterprise features, 10 GB/day indexing quota), valid until 2027-04-16. It replaced the Enterprise trial, which was due to expire on 2026-11-11, on 2026-10-18. Splunk Free does not include alerting, so the scheduled alerts in [`08-detection-engineering`](../08-detection-engineering/) run only while an Enterprise-type licence is valid.
 
 ---
 
@@ -26,7 +26,7 @@ The project covers VM provisioning, static network configuration (including a re
 2. **Network Configuration:** Assign a static IP outside the DHCP pool, and resolve a cloud-init persistence issue that silently reverted the config on reboot.
 3. **Splunk Installation:** Transfer and install the Splunk Enterprise `.deb` package, start the service, and create the admin account.
 4. **Firewall Configuration:** Open the Splunk Web port through UFW, which was blocking access by default.
-5. **Log Pipeline:** Enable the forwarder receiver, deploy the Universal Forwarder on `DC01`, and restrict ingestion to high-value authentication events.
+5. **Log Pipeline:** Enable the forwarder receiver, deploy the Universal Forwarder on `DC01`, and forward its Windows Security log.
 6. **Threat Simulation:** Trigger a real Active Directory account creation event and confirm it reaches Splunk.
 7. **Detection Engineering:** Build and validate SPL searches for account creation and failed logons, and turn them into scheduled alerts (a Kerberos detection is planned).
 
@@ -100,7 +100,7 @@ Splunk Web then loaded correctly from the host browser at `http://192.168.56.15:
 
 ### Phase 4: Endpoint Integration & Log Pipeline Architecture
 
-To establish end-to-end log aggregation from the Active Directory environment, a Splunk Universal Forwarder was deployed on Domain Controller `DC01` (`192.168.56.10`) and configured to stream targeted Security Event logs to the Splunk indexer (`192.168.56.15:9997`).
+To establish end-to-end log aggregation from the Active Directory environment, a Splunk Universal Forwarder was deployed on Domain Controller `DC01` (`192.168.56.10`) and configured to stream Security Event logs to the Splunk indexer (`192.168.56.15:9997`).
 
 #### 1. Receiver Socket & Firewall Configuration
 
@@ -119,9 +119,9 @@ sudo ss -tlnp | grep 9997
 
 ![UFW rules and splunkd bound to the receiver port](screenshots/07-ubuntu-firewall-and-splunkd-port-listener.png)
 
-#### 2. Ingestion Filtering (`inputs.conf`)
+#### 2. Event Collection (`inputs.conf`)
 
-Rather than ingesting the noisy default event stream, a custom `inputs.conf` on `DC01` restricts collection to high-value identity and authentication events:
+The forwarder on DC01 collects the Windows Security log. The configuration originally documented here was a whitelist limiting collection to four event IDs:
 
 * **Event ID 4624:** Successful account logon
 * **Event ID 4625:** Failed account logon
@@ -137,9 +137,13 @@ evt_resolve_ad_obj = 1
 whitelist = 4624,4625,4720,4768
 ```
 
-`whitelist` limits ingestion to the four Event IDs above, `start_from = oldest` with `current_only = 0` also backfills existing historical events, and `evt_resolve_ad_obj = 1` resolves Active Directory object identifiers to readable names.
+`start_from = oldest` with `current_only = 0` backfills existing historical events. The `whitelist` and `evt_resolve_ad_obj = 1` lines in the block above are not part of the deployed configuration; see the correction below.
 
-![inputs.conf Security log whitelist on DC01](screenshots/08-inputs-conf-security-log-whitelist.png)
+![Draft inputs.conf in an unsaved Notepad window on DC01 (not the deployed file)](screenshots/08-inputs-conf-security-log-whitelist.png)
+
+> **Correction (2026-10-17).** The block above is not the configuration deployed on DC01. `btool` shows the effective `[WinEventLog://Security]` stanza has no whitelist or blacklist, and `evt_resolve_ad_obj` is at its default of 0 (the block above sets it to 1). `apps\search\local\inputs.conf` was last written on 2026-09-28 at 16:04:07, and every event code checked, including codes the whitelist would have excluded (4672, 4688, 4738 and others), was first indexed at 16:07:45 that day. The forwarder therefore sends the Security log without filtering by event ID. Splunk first received data from DC01 on 2026-09-25 (21:47), but the Security log was read in one backfill that began at 16:07:45 on 2026-09-28, shortly after the file was written: about 36,000 events were indexed into `main` in the 16:00 hour that day, against a handful per hour before it, and no DC01 Security event in the index today was indexed earlier. The screenshot above is an unsaved Notepad draft of the intended file: the deployed file has the same `disabled`, `start_from`, `current_only` and `index` lines, but not the `whitelist`, `evt_resolve_ad_obj` or `checkpointInterval` lines. Whether the documented whitelist was ever in effect has not been established.
+
+![Effective [WinEventLog://Security] configuration from btool on DC01 (2026-10-17)](screenshots/btool-effective-security-input.png)
 
 #### 3. Forwarder Target Routing (`outputs.conf`)
 
@@ -231,6 +235,7 @@ An earlier version of this search referenced fields that do not exist in this da
 |---|---|---|---|
 | New account created | 4720 | T1136 - Create Account | Live alert (DET-001) |
 | Excessive failed logons | 4625 | T1110.001 - Password Guessing | Live alert (DET-002) |
+| Account deleted | 4726 | T1531 - Account Access Removal | Live alert (DET-003) |
 | Kerberos TGT baseline | 4768 | T1558 - Steal or Forge Kerberos Tickets (baseline) | Planned |
 
 ---
@@ -300,7 +305,7 @@ This deployment surfaced several real-world issues worth documenting, since they
 ## SOC Analyst Takeaways
 
 * **Centralized Authentication Visibility:** Domain Controller security events now flow into Splunk in near real time, so account creation and failed-logon activity can be searched from one place instead of logging into each host.
-* **Targeted Ingestion:** Whitelisting four high-value Event IDs keeps noise and storage low, which matters on a lab with limited disk and mirrors how real teams control SIEM ingestion costs.
+* **Check the effective configuration, not the intended one:** The forwarder was documented as whitelisting four event IDs, but the effective configuration has no whitelist, and the index holds 50 distinct event codes (as of 2026-10-17). What limits coverage is the Domain Controller's audit policy: `auditpol` shows Success only for Credential Validation and Kerberos Authentication Service, so failed Kerberos pre-authentication (4771) and failed NTLM validation (4776) are never written to the log. This surfaced while building DET-003, when a 4726 arrived that the documented whitelist would have blocked.
 * **Validated, Not Assumed:** Detections were tested against a simulated attack rather than only written, which is the difference between a query that exists and a detection that works.
 
 ## Next Steps
