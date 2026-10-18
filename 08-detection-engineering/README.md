@@ -22,6 +22,6 @@ An authentication dashboard is also planned.
 
 ## Environment
 
-Splunk Enterprise 10.4.3 on splunk-siem, ingesting Windows Security events from the Domain Controller DC01 through a Universal Forwarder. Alerts use the built-in Triggered Alerts action, since the lab has no mail or webhook infrastructure. The Splunk Enterprise trial licence on this instance expires on Nov 11, 2026. Splunk Free does not include alerting, so the alerts run only while the trial is valid, and the SPL remains portable.
+Splunk Enterprise 10.4.3 on splunk-siem, ingesting Windows Security events from the Domain Controller DC01 through a Universal Forwarder. Alerts use the built-in Triggered Alerts action, since the lab has no mail or webhook infrastructure. The instance runs a Splunk Developer Personal License (Enterprise features, valid until 2027-04-16), which replaced the Enterprise trial on 2026-10-18. The alerts were built and tested under the trial. Splunk Free does not include alerting, so the alerts run only while an Enterprise-type licence is valid, and the SPL remains portable.
 
 Related: [investigations/](../investigations/) holds worked investigations of alerts from these detections.

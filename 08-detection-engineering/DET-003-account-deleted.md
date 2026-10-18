@@ -2,7 +2,7 @@
 
 | Field | Detail |
 |---|---|
-| Status | Live in lab (runs while the Splunk Enterprise trial licence is valid, until Nov 11, 2026) |
+| Status | Live in lab (runs while the Splunk licence is valid; the Developer Personal License expires 2027-04-16) |
 | Severity | Medium (stored as `alert.severity = 3`) |
 | Data source | Windows Security log from DC01, forwarded by the Splunk Universal Forwarder |
 | Event ID | 4726 - A user account was deleted |
@@ -171,7 +171,7 @@ No extraction or timing problems were found: the extraction matched the real eve
 - **The throttle hides repeats.** A second deletion of an account with the same name inside 30 minutes does not alert again.
 - **Late events can be missed.** The 10-minute lookback does not reach events indexed after an outage.
 - **Log clearing hides it.** Clearing the Security log (1102) removes the evidence, and that is not detected yet.
-- **Licence dependency.** The alert runs only while the Splunk Enterprise trial is valid (until Nov 11, 2026). The SPL itself is portable.
+- **Licence dependency.** Splunk Free does not include alerting, so the alert runs only while an Enterprise-type licence is valid. The instance runs a Splunk Developer Personal License that expires on 2027-04-16. It replaced the Enterprise trial that was due to expire on 2026-11-11, and the alert was built and tested under the trial. The SPL itself is portable.
 
 ## Production response
 
