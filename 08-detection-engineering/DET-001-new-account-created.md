@@ -2,7 +2,7 @@
 
 | Field | Detail |
 |---|---|
-| **Status** | Live in lab (runs while the Splunk Enterprise trial licence is valid, until Nov 11, 2026) |
+| **Status** | Live in lab (runs while the Splunk licence is valid; the Developer Personal License expires 2027-04-16) |
 | **Severity** | High (stored as `alert.severity = 4`) |
 | **Data source** | Windows Security log from `DC01`, forwarded by the Splunk Universal Forwarder |
 | **Event ID** | 4720 - A user account was created |
@@ -125,13 +125,13 @@ index=_internal sourcetype=scheduler savedsearch_name="DET-001*"
 ## Limitations
 
 * **Throttle behavior not yet observed.** The throttle settings are stored and verified through Splunk's saved-search settings, but a test that recreates the same account within 30 minutes has not been run. Recreating the same account name within 30 minutes will not alert again.
-* **Event 4720 shows only the moment of creation.** Its account flags do not reflect the account's final state (see [Investigation 01](../investigations/01-unauthorized-account-creation/)). Events 4722 (enabled), 4738 (changed) and 4728/4732 (group membership) are not in the forwarder whitelist, so Splunk cannot show what happens to the account afterward.
+* **Event 4720 shows only the moment of creation.** Its account flags do not reflect the account's final state (see [Investigation 01](../investigations/01-unauthorized-account-creation/)). The forwarder sends the Security log without filtering by event ID, and events 4738 (changed), 4728 and 4732 (group membership) are present in the index (as of 2026-10-17), but no search uses them yet, so this detection cannot show what happens to the account afterward. Whether 4722 (enabled) is collected has not been checked.
 * **Computer accounts are not covered.** They log under Event ID 4741, not 4720.
 * **Names containing spaces would be cut off.** The `rex` pattern captures up to the first space.
 * **Detection delay is up to about 20 minutes.** The alert runs every 15 minutes and depends on the forwarder being up.
 * **Legitimate onboarding also triggers it.** In production, known provisioning accounts would be excluded or the alert would be matched against change tickets.
 * **The only action is Triggered Alerts.** Email, webhook or ticketing would be added in a production deployment.
-* **Licence dependency.** Splunk Free does not include alerting, and the instance warns when an alert is saved that the scheduled search will not run after the trial licence expires (Nov 11, 2026 on this instance). The SPL itself is portable to any licensed Splunk deployment.
+* **Licence dependency.** Splunk Free does not include alerting, so the scheduled search runs only while an Enterprise-type licence is valid. The instance runs a Splunk Developer Personal License that expires on 2027-04-16. When this alert was saved the instance was on the Enterprise trial and warned that the scheduled search would not run after the trial expired (2026-11-11); the licence has since been replaced. The SPL itself is portable to any licensed Splunk deployment.
 * **Display quirk.** The Alerts list page reports "2 Actions", but the saved configuration contains a single action (`actions = list`). I did not investigate it further.
 
 ---

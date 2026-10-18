@@ -2,7 +2,7 @@
 
 | Field | Detail |
 |---|---|
-| **Status** | Live in lab (runs while the Splunk Enterprise trial licence is valid, until Nov 11, 2026) |
+| **Status** | Live in lab (runs while the Splunk licence is valid; the Developer Personal License expires 2027-04-16) |
 | **Severity** | Medium (stored as `alert.severity = 3`) |
 | **Data source** | Windows Security log from `DC01`, forwarded by the Splunk Universal Forwarder |
 | **Event ID** | 4625 - An account failed to log on |
@@ -149,22 +149,24 @@ The first extraction idea was to take the account name from the top of the event
 
 **Problem.** Six failed logons against `AlertTestUser06` using the server's hostname (`\\DC01`) produced no 4625 events in Splunk, although the account's creation event arrived and the forwarder was healthy. The same loop against the IP address (`\\192.168.56.10`) produced six.
 
-**Likely cause.** A connection by hostname with a valid domain name may be tried with Kerberos first, and Kerberos failures are logged as 4771, which is not in the forwarder whitelist. An earlier run by hostname with a mistyped domain (`CDMC`) did produce 4625 events, which fits this explanation. The Security log for the hostname run was not checked for 4771, so this is unverified.
+**Likely cause.** A connection by hostname with a valid domain name may be tried with Kerberos first, and a failed Kerberos pre-authentication is logged as 4771. An earlier run by hostname with a mistyped domain (`CDMC`) did produce 4625 events, which fits this explanation.
 
-**Consequence.** The detection sees NTLM failures logged as 4625 and is blind to anything logged as 4771 or 4776.
+**Evidence.** DC01's own Security log for 2026-10-13 contains no 4771 and no 4625 other than the six from the IP-address test (10:36:15 to 10:36:22). It also contains one 4776 at 10:09:58, which can only be a success because failures are not audited. `auditpol` shows **Success only** for Credential Validation and Kerberos Authentication Service, so a failed Kerberos pre-authentication (4771) or a failed NTLM validation (4776) would never be written to the log. This is consistent with the Kerberos explanation, but the route the hostname connection took was not confirmed.
+
+**Consequence.** The gap is in the Domain Controller's audit policy, not in the forwarder or the search. The detection counts only 4625 events, so failures that take the Kerberos route are invisible to it.
 
 ---
 
 ## Limitations
 
-* **Kerberos and other failure types are not covered.** Events 4771 (Kerberos pre-authentication failed) and 4776 (NTLM credential validation) are not collected.
+* **Kerberos and NTLM failures are not counted.** 4771 (Kerberos pre-authentication failed) and failed 4776 (NTLM credential validation) are never logged, because the Domain Controller audits only successes for Kerberos Authentication Service and Credential Validation. The 4776 events seen in Splunk are successes.
 * **Password spraying is not detected.** The count is per account, so one password tried across many accounts stays under the threshold. That needs a search counting distinct accounts per source.
 * **Slow guessing evades it.** See the below-threshold test.
 * **The threshold of 5 is untuned.** No baseline of normal failed logons has been measured.
 * **The throttle hides repeat bursts.** A second burst by the same account and source within 30 minutes does not alert again.
 * **Only `DC01` is monitored.** Failed logons on other machines are not collected.
 * **Late events can be missed.** The 10-minute lookback does not reach events indexed after an outage.
-* **Licence dependency.** Splunk Free does not include alerting, and the instance warns when an alert is saved that the scheduled search will not run after the trial licence expires (Nov 11, 2026 on this instance). The SPL itself is portable to any licensed Splunk deployment.
+* **Licence dependency.** Splunk Free does not include alerting, so the scheduled search runs only while an Enterprise-type licence is valid. The instance runs a Splunk Developer Personal License that expires on 2027-04-16. When this alert was saved the instance was on the Enterprise trial and warned that the scheduled search would not run after the trial expired (2026-11-11); the licence has since been replaced. The SPL itself is portable to any licensed Splunk deployment.
 
 ---
 
@@ -176,6 +178,6 @@ If this fired in a production environment:
 2. **Look for a success afterwards.** A 4624 for the same account and source after the failures would suggest the guess worked, and the severity would rise.
 3. **Check the source.** An unknown internal host or an external address, and whether it is expected to authenticate at all.
 4. **Reset or lock the account** if a success followed the failures, and review what it accessed.
-5. **Collect the missing events.** Add 4771 and 4776 to the forwarder whitelist, and 4740 (account lockout), so the picture is complete.
+5. **Collect the missing events.** Enable failure auditing for Kerberos Authentication Service and Credential Validation (on a Domain Controller, through Group Policy so it persists), then extend the detection to 4771 and 4776, and add 4740 (account lockout).
 
 A worked example of triaging an alert is in [Investigation 01](../investigations/01-unauthorized-account-creation/).
