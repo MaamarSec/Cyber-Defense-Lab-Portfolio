@@ -2,6 +2,19 @@
 
 This folder turns the searches built in [07-splunk-siem](../07-splunk-siem/) into scheduled Splunk alerts, with each detection documented: the logic, the alert settings as stored, the test that proved it fires, and the problems found while tuning it.
 
+## Detection pipeline
+
+```mermaid
+flowchart LR
+  A["DC01 Security log<br/>(audit policy decides what is written)"] --> B["Splunk Universal Forwarder<br/>(no event ID filter)"]
+  B -->|"TCP 9997"| C["Splunk indexer<br/>index main"]
+  C --> D["Scheduled searches<br/>DET-001 (4720), DET-002 (4625), DET-003 (4726)"]
+  D -->|"rex extracts names, throttle on key field"| E["Triggered Alerts"]
+  E --> F["Triage and investigation<br/>(Investigation 01)"]
+```
+
+The forwarder sends the whole Security log, so the Domain Controller's audit policy decides which events exist. As of 2026-10-17, failures are not audited for Kerberos Authentication Service or Credential Validation, so 4771 and failed 4776 never reach the log (see DET-002).
+
 ## Detection library
 
 | ID | Detection | Event ID | MITRE ATT&CK | Status | Documentation |
