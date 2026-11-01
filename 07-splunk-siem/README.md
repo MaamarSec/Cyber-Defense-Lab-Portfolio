@@ -173,7 +173,7 @@ Test-NetConnection -ComputerName 192.168.56.15 -Port 9997
 
 ### Phase 5: Threat Simulation & Pipeline Verification
 
-An Active Directory account creation was simulated on DC01 from PowerShell at 13:07:48 on 2026-09-28 (MITRE ATT&CK T1136 – Create Account). The forwarder read the Security log from the beginning at 16:07:45 that day, so this event reached Splunk through the initial backfill and not as live traffic. Live delivery was validated later, when the DET-001 to DET-003 tests produced alerts within minutes of the event:
+An Active Directory account creation was simulated on `DC01` from PowerShell at 16:07:48 DC01 local time on 2026-09-28 (MITRE ATT&CK T1136 – Create Account). The forwarder's Security log reader had started three seconds earlier, at 16:07:45, so the event was picked up as the reader reached the end of the log. Splunk displayed the event at the time as 13:07:48, the same instant in UTC. Live delivery was validated further when the DET-001 to DET-003 tests produced alerts within minutes of each event.
 
 ```powershell
 net user FakeTestUser <TestPassword> /add
