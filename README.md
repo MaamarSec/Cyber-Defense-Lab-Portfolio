@@ -1,8 +1,20 @@
 # Cyber-Defense-Lab-Portfolio
 
+![Status](https://img.shields.io/badge/status-in--progress-yellow)
+![Splunk](https://img.shields.io/badge/Splunk-Enterprise-black?logo=splunk)
+![pfSense](https://img.shields.io/badge/pfSense-Firewall-0d3f5f)
+![Suricata](https://img.shields.io/badge/Suricata-IDS%2FIPS-red)
+![Zeek](https://img.shields.io/badge/Zeek-Network%20Analysis-blue)
+![Active Directory](https://img.shields.io/badge/Active%20Directory-Windows%20Server-0078D4?logo=windows)
+![Linux](https://img.shields.io/badge/Linux-Ubuntu%20Server-E95420?logo=ubuntu)
+
 I'm building a hands-on Security Operations Center (SOC) home lab from scratch and documenting my progress as I learn defensive security across network monitoring, endpoint security, identity & access management, SIEM engineering, threat hunting, and cloud defense.
 
-**Created by:** Maamar-Sec **Status:** 🚧 In Progress **Started:** April 2026
+**Created by:** MaamarSec | **Status:** 🚧 In Progress | **Started:** April 2026
+
+**Contact:** maamar[dot]sec[at]outlook[dot]com
+
+**Focus:** SOC analyst and detection engineering roles, open to related defensive security opportunities
 
 ---
 
@@ -142,6 +154,7 @@ The forwarder sends the whole Security log, so the Domain Controller's audit pol
 - Active Directory Domain Services, DNS, Group Policy fundamentals
 - Splunk Enterprise, Splunk Universal Forwarder, SPL
 - Windows Security event logging, PowerShell
+- MITRE ATT&CK (detection mapping)
 
 **Planned**
 
@@ -177,3 +190,10 @@ This portfolio is based on:
 ## ⚖️ Legal & Ethics
 
 All security activities are carried out strictly within controlled lab environments on systems that I own. This project is dedicated solely to ethical and defensive cybersecurity practices.
+
+---
+
+## 📄 License
+
+- **Code and configurations** (scripts, configs, automation): [MIT License](./LICENSE)
+- **Documentation and screenshots** (READMEs, diagrams, write-ups): [CC BY 4.0](./LICENSE-docs)
