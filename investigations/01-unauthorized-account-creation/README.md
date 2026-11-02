@@ -14,7 +14,7 @@
 | **Detection Source** | Splunk Enterprise (SPL search against Windows Security Event Log) |
 | **Event ID** | 4720 — A user account was created |
 | **Host** | `DC01.cdmdc.local` (Active Directory Domain Controller) |
-| **Timestamp** | 2026-09-28 13:07:48.369 |
+| **Timestamp** | 2026-09-28 16:07:48.369 (DC01 local time, UTC+3). Splunk displayed it as 13:07:48.369 at the time, the same instant in UTC |
 | **New Account** | `FakeTestUser` (SID: `S-1-5-21-888440556-1904330955-549321856-1105`) |
 | **Created By** | `CDMDC\Administrator` (SID: `S-1-5-21-888440556-1904330955-549321856-500`) |
 | **MITRE ATT&CK** | [T1136 – Create Account](https://attack.mitre.org/techniques/T1136/) |
@@ -35,7 +35,7 @@ index=main EventCode=4720
 
 ## Investigation Steps
 
-1. **Identified the trigger.** The `New account creation` SPL search (one of three detections built in the Splunk lab) returned a result for an account named `FakeTestUser`, created at `2026-09-28 13:07:48` on `DC01`.
+1. **Identified the trigger.** The `New account creation` SPL search (one of three detections built in the Splunk lab) returned a result for an account named `FakeTestUser`, created at `2026-09-28 16:07:48` DC01 local time (Splunk displayed it as 13:07:48, the same instant in UTC) on `DC01`.
 
 2. **Reviewed the full event body.** The raw Windows Security log entry (Event ID 4720) was pulled directly from Splunk rather than relying on the summarized table view, to confirm the subject and target account details:
 
@@ -59,9 +59,10 @@ index=main EventCode=4720
 
 | Time (UTC+3) | Event |
 |---|---|
-| 13:07:48.369 | `net user FakeTestUser <password> /add` executed on `DC01` by `CDMDC\Administrator` |
-| 16:07:45 | Splunk Universal Forwarder on `DC01` first reads the Security log from the beginning and indexes the Event ID 4720 entry (`192.168.56.15:9997`). An earlier version of this timeline gave about 13:08, but no event in the index was indexed before 16:07:45 |
-| After 16:07:45 | Analyst runs the Event ID 4720 SPL search in Splunk Web, confirming the event was ingested and searchable |
+| 16:07:45 | The Universal Forwarder's Security log reader starts reading `DC01`'s log |
+| 16:07:48.369 | `net user FakeTestUser <password> /add` executed on `DC01` by `CDMDC\Administrator` |
+| Shortly after | The reader picks up the Event ID 4720 entry and forwards it to the indexer (`192.168.56.15:9997`); the event's exact index time was not recorded |
+| Later | Analyst runs the Event ID 4720 SPL search in Splunk Web, confirming the event was ingested and searchable |
 
 ---
 
